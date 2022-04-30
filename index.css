@@ -54,6 +54,9 @@
     
 }
 
+#visible{
+    visibility: hidden;
+}
 @media (min-width: 768px) {
     .button-54 {
     padding: 0.25em 0.75em;
@@ -62,7 +65,7 @@
 
 #equal {
     height: 50px;
-    width: 200px;
+    width: 140px;
     grid-gap: 1px 1px;
     margin: 0 10px
 }

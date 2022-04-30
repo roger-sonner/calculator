@@ -1,41 +1,107 @@
-var viewfinder = document.getElementById('viewfinder');  
-var detailResult = document.getElementById('detailResult'); 
-var numbers = "0123456789";
+let viewfinder = document.getElementById('viewfinder');
+let detailResult = document.getElementById('detailResult');
+const numbers = "0123456789";
+const logicalOperators = "/*-+";
+let lastKeyPress = "";
+let stitch = '';
 
 let buttons = Array.from(document.getElementsByClassName('button'));
 
 buttons.map( button => {
     button.addEventListener('click', (e) => {
-        switch(e.target.innerText){
+        let currentKey = e.target.innerText;
+        switch(currentKey){
             case 'C':
-                (viewfinder.innerText != '') ? viewfinder.innerText = '' : "pass";
+                if(viewfinder.innerText !== ''){
+                    viewfinder.innerText = '';
+                }
+                lastKeyPress = "";
                 break;
             case '=':
-                if((!compareExpression(viewfinder.innerText[0]))){
-                    try{
-                        var result = myCalculator(viewfinder.innerText);
-                        if(result != "Erro"){
-                            result = Math.round(result * 10000) / 10000;
-                            viewfinder.innerText = result;
-                            printDetail("--------------------------------------", true);
+                var numError = stitchInvalided(viewfinder.innerText);
+                if(numError == ""){
+                    if((!compareExpression(viewfinder.innerText[0])) &&
+                    (!compareExpression(viewfinder.innerText.charAt(viewfinder.innerText.length-1)))){
+                        try{
+                            var result = myCalculator(viewfinder.innerText);
+                            if(result === "Erro"){
+                                result = Math.round(result * 10000) / 10000;
+                                viewfinder.innerText = result;
+                                lastKeyPress = "";
+                                printDetail("--------------------------------------", true);
+                            }
+                        } catch (e) {
+                            alert(e);
                         }
-                    } catch (e) {
-                        alert(e);
+                        break;
+                    }else{
+                        printDetail("Verifique: "+viewfinder.innerText, true);
+                        break;
                     }
-                    break;
                 }else{
-                    printDetail("Verifique: "+viewfinder.innerText, true);
-                    break;
+                    printDetail("Expressão inválida: "+numError, true);
                 }
             case '←':
                 (viewfinder.innerText) ? viewfinder.innerText = viewfinder.innerText.slice(0, -1) : "pass";
                 break;
             default:
-                viewfinder.innerText += e.target.innerText;
-        }
+                if((lastKeyPress === "") && (!isOperator(currentKey))){         // A primeira tecla digitada não pode ser um operador
+                    viewfinder.innerText += currentKey; 
+                }else if(isOperator(currentKey) && isOperator(lastKeyPress)){   // A tecla atual é um operador e a anterior também
+                    viewfinder.innerText = viewfinder.innerText.slice(0, -1);
+                    viewfinder.innerText += currentKey;
+                }else if(isOperator(currentKey) && !isOperator(lastKeyPress)){  // A tecla atual é um operador e a anterior não
+                    viewfinder.innerText += currentKey;
+                }else if(!isOperator(currentKey) && isOperator(lastKeyPress)) {  // A tecla atual não é um operador e a anterior é
+                    viewfinder.innerText += currentKey;
+                }else if(!isOperator(currentKey) && !isOperator(lastKeyPress)){  // Ambas as teclas são números
+                    if(currentKey === '.'){
+                        console.log('Ponto');
+                    }
+                    viewfinder.innerText += currentKey;
+                }
+        }    
+        lastKeyPress = currentKey;
     });
 });
 
+function stitchInvalided(str){
+    var numbers = [];
+    var posFisrtOperator = 0;
+    var posNextOperator = 0;
+    var numError = "";
+    for(var i = 0; i < str.length; i++){
+        if(isOperator(str[i]) || i === 0){
+            if(i === 0) {
+                posFisrtOperator = i;
+            }else{
+                posFisrtOperator = i + 1;
+            }
+            for(var j = i+1; str.length; j++){
+                if(isOperator(str[j]) || j === str.length){
+                    posNextOperator = j;
+                    break;
+                }
+            }
+            numbers.push(str.substring(posFisrtOperator, posNextOperator));
+        }
+    }
+    for(var i = 0; i < numbers.length; i++){
+        if(numbers[i].indexOf(".") !== numbers[i].lastIndexOf(".")){
+            return numbers[i];
+        }
+    }
+    return numError;
+}
+
+function isOperator(str){
+
+    if(logicalOperators.indexOf(str) !== -1){
+        return true;
+    }else{
+        return false;
+    }
+}
 
 function myCalculator(str){
     var expression = str.replace(/\s/g, '');
@@ -46,11 +112,11 @@ function myCalculator(str){
     var start = str.charAt(0);
     var theEnd = str.charAt(str.length-1);
     var duplicateOperator = lookForDuplicateOperator(str)
-    if((numbers.indexOf(start) == -1) || (numbers.indexOf(theEnd) == -1)){
+    if((numbers.indexOf(start) === -1) || (numbers.indexOf(theEnd) === -1)){
         printDetail("Verifique: "+str, true);
         return "Erro";
     }
-    if(duplicateOperator != ""){
+    if(duplicateOperator !== ""){
         printDetail("Operadores em sequencia ("+duplicateOperator+").", true);
         return "Erro";
     }
@@ -58,15 +124,15 @@ function myCalculator(str){
     for(var i = 0; i < expression.length; i++){
         if(compareExpression(expression[i])){
             foundOperator = true;
-            if(operators.indexOf(expression[i]) == -1){
+            if(operators.indexOf(expression[i]) === -1){
                 operators += expression[i]
             }
         }else{
             stringTemp = stringTemp + expression[i];
         }
-        if(stringTemp != "" && (foundOperator == true || i == (expression.length-1))){
+        if(stringTemp !== "" && (foundOperator === true || i === (expression.length-1))){
             arrayOfNumbers.push(stringTemp);
-            if(i != (expression.length-1)){
+            if(i !== (expression.length-1)){
                 arrayOfNumbers.push(expression[i])
             }
             stringTemp = "";
@@ -77,7 +143,7 @@ function myCalculator(str){
 }
 
 function compareExpression(str){
-    if((str == "+") || (str == "-") || (str == "*") || (str == "/")){
+    if((str === "+") || (str === "-") || (str === "*") || (str === "/")){
         return true;
     }else{
         return false;
@@ -88,7 +154,7 @@ function startCalculator(arrayExpression, operators){
     var orderOfPrecedence = setPrecedenceOrder(operators); 
     var accumulatedResul= 0;
     for(var i = 0; i < orderOfPrecedence.length; i++ ){
-        while(arrayExpression.indexOf(orderOfPrecedence[i]) != -1){
+        while(arrayExpression.indexOf(orderOfPrecedence[i]) !== -1){
             var positionOperator = arrayExpression.indexOf(orderOfPrecedence[i]);
             accumulatedResul = solveOperation(orderOfPrecedence[i],
                                               arrayExpression[positionOperator-1],
@@ -102,20 +168,20 @@ function startCalculator(arrayExpression, operators){
 function setPrecedenceOrder(operators){
     var firstBlock = "", secundBlock = "";
     for(var i = 0; i < operators.length; i++){
-        (operators[i] == "/") || (operators[i] == "*") ? firstBlock += operators[i] : secundBlock += operators[i];
+        (operators[i] === "/") || (operators[i] === "*") ? firstBlock += operators[i] : secundBlock += operators[i];
     }
     return firstBlock+secundBlock;
 }
 
 function solveOperation(operation, firstValue, secondValue){
     var res = 0;
-    if(operation == "+"){
+    if(operation === "+"){
         res = parseFloat(firstValue) + parseFloat(secondValue);
-    }else if(operation == "-"){
+    }else if(operation === "-"){
         res = parseFloat(firstValue) - parseFloat(secondValue);
-    }else if(operation == "*"){
+    }else if(operation === "*"){
         res = parseFloat(firstValue) * parseFloat(secondValue);
-    }else if(operation == "/"){
+    }else if(operation === "/"){
         res = parseFloat(firstValue) / parseFloat(secondValue);
     }
     printDetail(firstValue + " " + operation + " " + secondValue + " = "+res.toString(), true)
