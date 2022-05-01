@@ -190,7 +190,7 @@ function solveOperation(operation, firstValue, secondValue){
 
 function lookForDuplicateOperator(operation){
     /*
-    var str = ["//","++","--","**", "/+","/-","/*","+/","+-","+*","-/","-+","-*","*/","*+","*-"];
+    //var str = ["//","++","--","**", "/+","/-","/*","+/","+-","+*","-/","-+","-*","*/","*+","*-"];
     var part = "";
     for(var i = 0; i < str.length; i++){
       for(var j = 0; j < operation.length; j++){
