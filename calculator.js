@@ -18,9 +18,7 @@ buttons.map( button => {
                 lastKeyPress = "";
                 break;
             case '=':
-                //console.log(detailResult.outerText);
-
-                var numError = stitchInvalided(viewfinder.innerText);
+                var numError = "";   // stitchInvalided(viewfinder.innerText);
                 if(numError == ""){
                     if((!compareExpression(viewfinder.innerText[0])) &&
                     (!compareExpression(viewfinder.innerText.charAt(viewfinder.innerText.length-1)))){
@@ -30,18 +28,18 @@ buttons.map( button => {
                                 result = Math.round(result * 10000) / 10000;
                                 viewfinder.innerText = result;
                                 lastKeyPress = "";
-                                printDetail("--------------------------------------", true);
+                                printDetail("--------------------------------------");
                             }
                         } catch (e) {
                             alert(e);
                         }
                         break;
                     }else{
-                        printDetail("Verifique: "+viewfinder.innerText, true);
+                        printDetail("Verifique: "+viewfinder.innerText);
                         break;
                     }
                 }else{
-                    printDetail("Expressão inválida: "+numError, true);
+                    printDetail("Expressão inválida: "+numError);
                 }
             case '←':
                 (viewfinder.innerText) ? viewfinder.innerText = viewfinder.innerText.slice(0, -1) : "pass";
@@ -49,7 +47,7 @@ buttons.map( button => {
             default:
                 if((lastKeyPress === "") && (!isOperator(currentKey))){         // A primeira tecla digitada não pode ser um operador
                     viewfinder.innerText += currentKey; 
-                }else if(isOperator(currentKey) && isOperator(lastKeyPress)){   // A tecla atual é um operador e a anterior também
+                }else if((isOperator(currentKey) && isOperator(lastKeyPress))){   // A tecla atual é um operador e a anterior também
                     viewfinder.innerText = viewfinder.innerText.slice(0, -1);
                     viewfinder.innerText += currentKey;
                 }else if(isOperator(currentKey) && !isOperator(lastKeyPress)){  // A tecla atual é um operador e a anterior não
@@ -57,10 +55,14 @@ buttons.map( button => {
                 }else if(!isOperator(currentKey) && isOperator(lastKeyPress)) {  // A tecla atual não é um operador e a anterior é
                     viewfinder.innerText += currentKey;
                 }else if(!isOperator(currentKey) && !isOperator(lastKeyPress)){  // Ambas as teclas são números
-                    if(currentKey === '.'){
-                        console.log('Ponto');
+                    if(currentKey == "."){
+                        var x = stitchInvalided(viewfinder.innerText+".");
+                        if(x == ""){
+                            viewfinder.innerText += currentKey;
+                        }
+                    }else{
+                        viewfinder.innerText += currentKey;
                     }
-                    viewfinder.innerText += currentKey;
                 }
         }    
         lastKeyPress = currentKey;
@@ -114,7 +116,7 @@ function myCalculator(str){
     var start = str.charAt(0);
     var theEnd = str.charAt(str.length-1);
     if((numbers.indexOf(start) === -1) || (numbers.indexOf(theEnd) === -1)){
-        printDetail("Verifique: "+str, true);
+        printDetail("Verifique: "+str);
         return "Erro";
     }
     detailResult.innerText += expression + "\r\n";
@@ -182,11 +184,10 @@ function solveOperation(operation, firstValue, secondValue){
     }else if(operation === "/"){
         res = parseFloat(firstValue) / parseFloat(secondValue);
     }
-    printDetail(firstValue + " " + operation + " " + secondValue + " = "+res.toString(), true)
+    printDetail(firstValue + " " + operation + " " + secondValue + " = "+res.toString())
     return res.toString();
 }
 
-function printDetail(str, jumpLine){
-    var jump = jumpLine ? "\r\n" : "";
-    detailResult.innerText += str + jump;
+function printDetail(str){
+    detailResult.innerText =  detailResult.innerText + str + "\r\n" ;
 }
