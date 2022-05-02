@@ -18,13 +18,15 @@ buttons.map( button => {
                 lastKeyPress = "";
                 break;
             case '=':
+                //console.log(detailResult.outerText);
+
                 var numError = stitchInvalided(viewfinder.innerText);
                 if(numError == ""){
                     if((!compareExpression(viewfinder.innerText[0])) &&
                     (!compareExpression(viewfinder.innerText.charAt(viewfinder.innerText.length-1)))){
                         try{
                             var result = myCalculator(viewfinder.innerText);
-                            if(result === "Erro"){
+                            if(result !== "Erro"){
                                 result = Math.round(result * 10000) / 10000;
                                 viewfinder.innerText = result;
                                 lastKeyPress = "";
@@ -111,16 +113,12 @@ function myCalculator(str){
     var operators = "";
     var start = str.charAt(0);
     var theEnd = str.charAt(str.length-1);
-    var duplicateOperator = lookForDuplicateOperator(str)
     if((numbers.indexOf(start) === -1) || (numbers.indexOf(theEnd) === -1)){
         printDetail("Verifique: "+str, true);
         return "Erro";
     }
-    if(duplicateOperator !== ""){
-        printDetail("Operadores em sequencia ("+duplicateOperator+").", true);
-        return "Erro";
-    }
     detailResult.innerText += expression + "\r\n";
+
     for(var i = 0; i < expression.length; i++){
         if(compareExpression(expression[i])){
             foundOperator = true;
@@ -186,20 +184,6 @@ function solveOperation(operation, firstValue, secondValue){
     }
     printDetail(firstValue + " " + operation + " " + secondValue + " = "+res.toString(), true)
     return res.toString();
-}
-
-function lookForDuplicateOperator(operation){
-    /*
-    //var str = ["//","++","--","**", "/+","/-","/*","+/","+-","+*","-/","-+","-*","*/","*+","*-"];
-    var part = "";
-    for(var i = 0; i < str.length; i++){
-      for(var j = 0; j < operation.length; j++){
-        if((operation[j]+operation[j+1]) == str[i]){
-          return str[i];
-        }
-      }
-    */
-    return "";
 }
 
 function printDetail(str, jumpLine){
